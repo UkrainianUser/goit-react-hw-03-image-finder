@@ -1,15 +1,101 @@
-import React from "react";
-import Searchbar from "./searchbar/Searchbar";
-import ImageGallery from "./imageGallery/ImageGallery";
+import React from 'react';
+import Searchbar from './searchbar/Searchbar';
+import ImageGallery from './imageGallery/ImageGallery';
+import Button from './button/Button';
+import css from './App.module.css';
 
-const App = () => {
+export class App extends React.Component {
+  state = {
+    searchQuery: '',
+    images: [],
+    page: 1,
+    showModal: false,
+    isEmpty: false,
+    error: '',
+    isLoading: false,
+    showLoadMore: false,
+  };
 
-  return (
-    <div>
-      <Searchbar />
-      <ImageGallery />
-    </div>
-  );
+  handleFormSubmit = query => {
+    this.setState({
+      searchQuery: query,
+      images: [],
+      page: 1,
+      showLoadMore: false,
+      isEmpty: false,
+      error: '',
+    });
+  };
+
+  handleGetImages = (searchQuery, page) => {
+    const BASE_URL = 'https://pixabay.com/api/';
+    const API_KEY = '34311781-efd5fccfe1ca82ca08bcfd072';
+    const url = `${BASE_URL}?q=${searchQuery}&page=${page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=12`;
+    this.setState({ isLoading: true });
+    fetch(url)
+      .then(response => response.json())
+      .then(({ hits, totalHits }) => {
+        if (!hits.length) {
+          this.setState({
+            isEmpty: true,
+          });
+          return;
+        }
+        this.setState({
+          images: [...this.state.images, ...hits],
+          showLoadMore: this.state.page < Math.ceil(totalHits / 12),
+        });
+      })
+      .catch(error => {
+        this.setState({ error: `${error}` });
+      })
+      .finally(() => this.setState({ isLoading: false }));
+  };
+
+  componentDidUpdate(prevProps, prevState) {
+    const prevQuery = prevState.searchQuery;
+    const newQuery = this.state.searchQuery;
+    const prevPage = prevState.page;
+    const newPage = this.state.page;
+
+    if (prevQuery !== newQuery || prevPage !== newPage) {
+      this.handleGetImages(newQuery, newPage);
+    }
+  }
+
+  openModal = url => {
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
+      urlModal: url,
+    }));
+  };
+
+  closeModal = () => {
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
+      urlModal: '',
+    }));
+  };
+
+  toggleOnLoading = () => {
+    this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
+  };
+
+  onLoadMore = () => {
+    this.setState(({ page }) => ({ page: page + 1 }));
+  };
+
+  render () {
+    return (
+      <div className={css.app}>
+        <Searchbar onSubmit={this.handleFormSubmit}/>
+        <ImageGallery 
+          images={this.state.images}
+        />
+        {this.state.showLoadMore && <Button onLoadMore={this.onLoadMore} />}
+      </div>
+    );
+  }
 };
 
 export default App;
