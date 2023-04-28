@@ -1,5 +1,6 @@
 import React from 'react';
 import css from './ImageGalleryItem.module.css';
+import PropTypes from "prop-types";
 
 const ImageGalleryItem = ({webformatURL, largeImageURL, tags, openModal, toggleOnLoading,}) => {
   return (
@@ -9,8 +10,8 @@ const ImageGalleryItem = ({webformatURL, largeImageURL, tags, openModal, toggleO
         src={webformatURL}
         data-large={largeImageURL}
         alt={tags}
-        onClick={event => {
-          openModal(event.target.dataset.large);
+        onClick={(evt) => {
+          openModal(evt.currentTarget.dataset.large);
           toggleOnLoading();
         }}
       />
@@ -19,3 +20,11 @@ const ImageGalleryItem = ({webformatURL, largeImageURL, tags, openModal, toggleO
 }
 
 export default ImageGalleryItem;
+
+ImageGalleryItem.propTypes = {
+  webformatURL: PropTypes.string.isRequired,
+  largeImageURL: PropTypes.string.isRequired,
+  tags: PropTypes.string.isRequired,
+  toggleOnLoading: PropTypes.func.isRequired,
+  openModal: PropTypes.func.isRequired,
+};

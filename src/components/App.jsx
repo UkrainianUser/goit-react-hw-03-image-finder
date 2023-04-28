@@ -2,6 +2,8 @@ import React from 'react';
 import Searchbar from './searchbar/Searchbar';
 import ImageGallery from './imageGallery/ImageGallery';
 import Button from './button/Button';
+import Loader from './loader/loader';
+import Modal from './modal/Modal';
 import css from './App.module.css';
 
 export class App extends React.Component {
@@ -14,7 +16,19 @@ export class App extends React.Component {
     error: '',
     isLoading: false,
     showLoadMore: false,
+    urlModal: '',
   };
+  
+  componentDidUpdate(prevProps, prevState) {
+    const prevQuery = prevState.searchQuery;
+    const newQuery = this.state.searchQuery;
+    const prevPage = prevState.page;
+    const newPage = this.state.page;
+
+    if (prevQuery !== newQuery || prevPage !== newPage) {
+      this.handleGetImages(newQuery, newPage);
+    }
+  }
 
   handleFormSubmit = query => {
     this.setState({
@@ -51,38 +65,27 @@ export class App extends React.Component {
       })
       .finally(() => this.setState({ isLoading: false }));
   };
-
-  componentDidUpdate(prevProps, prevState) {
-    const prevQuery = prevState.searchQuery;
-    const newQuery = this.state.searchQuery;
-    const prevPage = prevState.page;
-    const newPage = this.state.page;
-
-    if (prevQuery !== newQuery || prevPage !== newPage) {
-      this.handleGetImages(newQuery, newPage);
-    }
-  }
-
-  openModal = url => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
+  
+  toggleOnLoading = () => {
+    this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
+  };
+  
+  onLoadMore = () => {
+    this.setState(({ page }) => ({ page: page + 1 }));
+  };
+  
+  openModal = (url) => {
+    this.setState(() => ({
+      showModal: true,
       urlModal: url,
     }));
   };
 
   closeModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
+    this.setState(() => ({
+      showModal: false,
       urlModal: '',
     }));
-  };
-
-  toggleOnLoading = () => {
-    this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
-  };
-
-  onLoadMore = () => {
-    this.setState(({ page }) => ({ page: page + 1 }));
   };
 
   render () {
@@ -90,9 +93,20 @@ export class App extends React.Component {
       <div className={css.app}>
         <Searchbar onSubmit={this.handleFormSubmit}/>
         <ImageGallery 
-          images={this.state.images}
+          images={this.state.images} openModal={this.openModal} toggleOnLoading={this.toggleOnLoading}
         />
         {this.state.showLoadMore && <Button onLoadMore={this.onLoadMore} />}
+        {this.state.isLoading && <Loader />}
+        {this.state.showModal && (
+          <Modal onClose={this.closeModal}>
+            <img
+              onLoad={this.toggleOnLoading}
+              src={this.state.urlModal}
+              alt=""
+              className={css['modal-img']}
+            />
+          </Modal>
+        )}
       </div>
     );
   }
