@@ -1,6 +1,7 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import css from './Modal.module.css';
+import PropTypes from "prop-types";
 
 const modalRoot = document.querySelector('#modal-root');
 class Modal extends React.Component {
@@ -44,3 +45,7 @@ class Modal extends React.Component {
 }
 
 export default Modal;
+
+Modal.propTypes = {
+  onClose: PropTypes.func.isRequired,
+}
