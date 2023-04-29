@@ -19,7 +19,7 @@ const ImageGallery = ({ images, toggleOnLoading, openModal }) => {
 export default ImageGallery;
 
 ImageGallery.propTypes = {
-  images: PropTypes.arrayOf(PropTypes.object).isRequired,
+  images: PropTypes.arrayOf(PropTypes.shape(PropTypes.string.isRequired)),
   toggleOnLoading: PropTypes.func.isRequired,
   openModal: PropTypes.func.isRequired,
 }

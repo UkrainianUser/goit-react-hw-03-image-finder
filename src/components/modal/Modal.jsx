@@ -48,4 +48,5 @@ export default Modal;
 
 Modal.propTypes = {
   onClose: PropTypes.func.isRequired,
+  children: PropTypes.element,
 }
